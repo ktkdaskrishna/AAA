@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Securado Axiom Playbook Entry",
+  "type": "object",
+  "required": [
+    "technique_id",
+    "name",
+    "tactic",
+    "risk_level",
+    "tools",
+    "command_template",
+    "detection_artifacts",
+    "compliance_mapping",
+    "requires_approval"
+  ],
+  "properties": {
+    "technique_id": {"type": "string"},
+    "name": {"type": "string"},
+    "tactic": {"type": "string"},
+    "risk_level": {"enum": ["LOW", "MEDIUM", "HIGH", "DESTRUCTIVE"]},
+    "tools": {"type": "array", "items": {"type": "string"}},
+    "command_template": {"type": "string"},
+    "detection_artifacts": {"type": "object"},
+    "compliance_mapping": {"type": "object"},
+    "requires_approval": {"type": "boolean"}
+  }
+}
