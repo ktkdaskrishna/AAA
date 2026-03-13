@@ -1,0 +1,10 @@
+{
+  "engagement_id": "ENG-2026-0001",
+  "allowed_cidrs": ["10.0.0.0/24"],
+  "excluded_ips": ["10.0.0.10"],
+  "window_start": 1767225600,
+  "window_end": 1767312000,
+  "permitted_tactics": ["Reconnaissance", "Execution"],
+  "session_secret": "replace_me",
+  "signature": "replace_with_hmac_sha256_signature"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "technique_id": "T1046",
+    "name": "Network Service Discovery",
+    "tactic": "Reconnaissance",
+    "risk_level": "LOW",
+    "tools": ["nmap"],
+    "command_template": "nmap -sV {{target}}",
+    "detection_artifacts": {"log_source": "IDS", "event_id": "SCAN_DETECTED", "siem_rule": "Port Scan"},
+    "compliance_mapping": {"nist_csf": ["DE.CM-1"], "cis_controls": ["13.7"], "iso_27001": ["A.12.4.1"]},
+    "requires_approval": false
+  },
+  {
+    "technique_id": "T1059.001",
+    "name": "PowerShell",
+    "tactic": "Execution",
+    "risk_level": "HIGH",
+    "tools": ["msfconsole", "caldera"],
+    "command_template": "powershell -EncodedCommand {{payload}}",
+    "detection_artifacts": {"log_source": "Windows Event Log", "event_id": "4688", "siem_rule": "Suspicious PowerShell Execution"},
+    "compliance_mapping": {"nist_csf": ["DE.CM-1"], "cis_controls": ["8.2"], "iso_27001": ["A.12.4.1"]},
+    "requires_approval": true
+  }
+]
