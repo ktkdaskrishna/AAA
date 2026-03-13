@@ -9,6 +9,17 @@ from .server import GatewayHTTPAPI
 api = GatewayHTTPAPI()
 
 
+STATUS_TEXT = {
+    200: "200 OK",
+    400: "400 Bad Request",
+    401: "401 Unauthorized",
+    403: "403 Forbidden",
+    404: "404 Not Found",
+    429: "429 Too Many Requests",
+    500: "500 Internal Server Error",
+}
+
+
 def application(environ, start_response):
     method = environ.get("REQUEST_METHOD", "GET")
     path = environ.get("PATH_INFO", "/")
@@ -22,10 +33,7 @@ def application(environ, start_response):
 
     status_code, payload = api.handle(method, path, body, headers)
     response = json.dumps(payload).encode("utf-8")
-    status_text = {200: "200 OK", 400: "400 Bad Request", 401: "401 Unauthorized", 404: "404 Not Found"}.get(
-        status_code, "500 Internal Server Error"
-    )
-    start_response(status_text, [("Content-Type", "application/json"), ("Content-Length", str(len(response)))])
+    start_response(STATUS_TEXT.get(status_code, STATUS_TEXT[500]), [("Content-Type", "application/json"), ("Content-Length", str(len(response)))])
     return [response]
 
 

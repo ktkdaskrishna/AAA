@@ -3,27 +3,30 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import asdict
-from pathlib import Path
 
 from .audit_logger import AuditLogger
 from .auth import verify_hmac
 from .kill_switch import KillSwitch
 from .models import SAD, ToolCall
-from .rate_limiter import SlidingWindowRateLimiter
-from .risk_classifier import classify_risk
+from .rate_limiter import RateLimitError, SlidingWindowRateLimiter
+from .risk_classifier import UnknownTechniqueError, classify_risk
 from .sad_validator import SADValidationError, validate_sad
-from .scope_enforcer import enforce_scope
+from .scope_enforcer import ScopeError, enforce_scope
 from .settings import Settings, load_settings
+from .state_store import StateStore
 
 
 class GatewayService:
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or load_settings()
-        self.sad: SAD | None = None
         self.kill_switch = KillSwitch()
         self.audit = AuditLogger(self.settings.audit_log_path)
-        self.chain_count = 0
         self.rate_limiter = SlidingWindowRateLimiter(self.settings.rate_limit_per_minute)
+        self.state_store = StateStore(self.settings.state_store_path)
+        self.sad, self.chain_count = self.state_store.load()
+
+    def _persist(self) -> None:
+        self.state_store.save(self.sad, self.chain_count)
 
     def health(self) -> dict:
         return {
@@ -34,12 +37,21 @@ class GatewayService:
             "max_chain_length": self.settings.max_chain_length,
         }
 
+    def ready(self) -> dict:
+        checks = {
+            "audit_log_writable": self.audit.path.parent.exists(),
+            "state_store_writable": self.state_store.path.parent.exists(),
+            "settings_valid": True,
+        }
+        return {"status": "ready" if all(checks.values()) else "not_ready", "checks": checks}
+
     def load_sad(self, sad_payload: dict) -> dict:
         sad = SAD(**sad_payload)
         now = int(time.time())
         validate_sad(sad, now, self.settings.sad_signing_secret)
         self.sad = sad
         self.chain_count = 0
+        self._persist()
         self.audit.append({"event_type": "sad_loaded", "engagement_id": sad.engagement_id, "timestamp": now})
         return {"status": "loaded", "engagement_id": sad.engagement_id}
 
@@ -96,6 +108,7 @@ class GatewayService:
             raise PermissionError("APPROVAL_REQUIRED")
 
         self.chain_count += 1
+        self._persist()
         result = {
             "status": "executed",
             "technique_id": call.technique_id,
@@ -117,25 +130,59 @@ class GatewayService:
 class GatewayHTTPAPI:
     def __init__(self, service: GatewayService | None = None):
         self.service = service or GatewayService()
+        self.metrics = {
+            "requests_total": 0,
+            "requests_errors_total": 0,
+            "tool_exec_total": 0,
+            "kill_switch_activations_total": 0,
+        }
+
+    def _map_error(self, exc: Exception) -> tuple[int, str]:
+        text = str(exc)
+        if isinstance(exc, PermissionError) and text == "AUTH_FAILED":
+            return 401, "AUTH_FAILED"
+        if isinstance(exc, PermissionError) and text in {"APPROVAL_REQUIRED", "CHAIN_LIMIT_REACHED", "TACTIC_NOT_PERMITTED", "Kill switch active"}:
+            return 403, text
+        if isinstance(exc, RateLimitError):
+            return 429, "RATE_LIMIT_EXCEEDED"
+        if isinstance(exc, ScopeError):
+            return 403, text
+        if isinstance(exc, SADValidationError):
+            return 400, "SAD_INVALID"
+        if isinstance(exc, UnknownTechniqueError):
+            return 400, "UNKNOWN_TECHNIQUE"
+        if isinstance(exc, ValueError):
+            return 400, text
+        return 500, "INTERNAL_ERROR"
 
     def handle(self, method: str, path: str, body: dict | None, headers: dict[str, str] | None = None) -> tuple[int, dict]:
         headers = headers or {}
+        self.metrics["requests_total"] += 1
         try:
             if method == "GET" and path == "/health":
                 return 200, self.service.health()
+            if method == "GET" and path == "/ready":
+                return 200, self.service.ready()
+            if method == "GET" and path == "/metrics":
+                return 200, self.metrics.copy()
             if method == "POST" and path == "/engagement/load-sad":
                 return 200, self.service.load_sad(body or {})
             if method == "POST" and path == "/tools/execute":
-                return 200, self.service.execute_tool(body or {})
+                result = self.service.execute_tool(body or {})
+                self.metrics["tool_exec_total"] += 1
+                return 200, result
             if method == "POST" and path in {"/control/kill", "/control/reset-kill"}:
                 if headers.get("x-api-key") != self.service.settings.admin_api_key:
-                    return 401, {"error": "UNAUTHORIZED"}
+                    return 401, {"error": "UNAUTHORIZED", "error_code": "UNAUTHORIZED"}
                 if path.endswith("kill") and not path.endswith("reset-kill"):
+                    self.metrics["kill_switch_activations_total"] += 1
                     return 200, self.service.activate_kill_switch(actor="api_admin")
                 return 200, self.service.reset_kill_switch(actor="api_admin")
-            return 404, {"error": "NOT_FOUND"}
-        except (ValueError, PermissionError, SADValidationError) as exc:
-            return 400, {"error": str(exc)}
+            return 404, {"error": "NOT_FOUND", "error_code": "NOT_FOUND"}
+        except Exception as exc:
+            self.metrics["requests_errors_total"] += 1
+            status, code = self._map_error(exc)
+            return status, {"error": str(exc), "error_code": code}
 
 
 def _demo() -> None:

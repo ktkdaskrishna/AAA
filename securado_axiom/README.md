@@ -27,6 +27,8 @@ python -m securado_axiom.gateway.src.app
 - `POST /tools/execute`
 - `POST /control/kill` (requires `x-api-key`)
 - `POST /control/reset-kill` (requires `x-api-key`)
+- `GET /ready`
+- `GET /metrics`
 
 Run tests:
 ```bash
@@ -36,3 +38,5 @@ pytest -q
 ## Additional Documentation
 - Deployment guide: `securado_axiom/docs/DEPLOYMENT_GUIDE.md`
 - Admin guide: `securado_axiom/docs/ADMIN_GUIDE.md`
+
+- Production release plan: `securado_axiom/docs/PRODUCTION_RELEASE_PLAN.md`

@@ -31,10 +31,12 @@ This repository now provides a **production-ready baseline** gateway service wit
 Create `.env` from `.env.example` and set secure values:
 
 - `AXIOM_AUDIT_LOG_PATH`
+- `AXIOM_STATE_STORE_PATH`
 - `AXIOM_SAD_SIGNING_SECRET`
 - `AXIOM_MAX_CHAIN_LENGTH`
 - `AXIOM_RATE_LIMIT_PER_MINUTE`
 - `AXIOM_ADMIN_API_KEY`
+- `AXIOM_STRICT_PRODUCTION`
 
 ## 5) Local Deployment
 
@@ -69,6 +71,8 @@ docker compose -f docker/docker-compose.yml down
 ## 8) Deployment Verification Checklist
 
 - [ ] `/health` returns `status=ok`
+- [ ] `/ready` returns `status=ready`
+- [ ] `/metrics` returns counters
 - [ ] Valid SAD can be loaded
 - [ ] Out-of-scope target is rejected
 - [ ] HIGH-risk technique requires approval
