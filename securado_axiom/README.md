@@ -15,6 +15,11 @@ Securado Axiom is a safety-first security control validation platform inspired b
 - Basic report generation from audit logs
 - Dockerfile + compose baseline
 
+## One-command Docker Install
+```bash
+bash docker/scripts/install.sh
+```
+
 ## Quickstart
 ```bash
 python -m pip install -e .

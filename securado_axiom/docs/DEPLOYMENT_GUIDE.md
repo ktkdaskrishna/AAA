@@ -58,6 +58,14 @@ curl -s http://localhost:8080/health
 
 ## 7) Container Deployment
 
+One-command installer:
+
+```bash
+bash docker/scripts/install.sh
+```
+
+Manual compose:
+
 ```bash
 docker compose -f docker/docker-compose.yml up --build -d
 ```
