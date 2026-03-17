@@ -20,5 +20,6 @@ def test_strict_production_rejects_defaults(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setenv("AXIOM_STRICT_PRODUCTION", "true")
     monkeypatch.setenv("AXIOM_ADMIN_API_KEY", "change-me")
     monkeypatch.setenv("AXIOM_SAD_SIGNING_SECRET", "dev-sad-secret")
+    monkeypatch.setenv("AXIOM_PLAYBOOK_SIGNING_SECRET", "dev-playbook-secret")
     with pytest.raises(ValueError, match="strict production"):
         load_settings()

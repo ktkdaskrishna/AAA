@@ -13,7 +13,7 @@ Securado Axiom is a safety-first security control validation platform inspired b
 - Global kill switch with admin API key guard
 - Playbook loader and sample ATT&CK entries
 - Basic report generation from audit logs
-- Dockerfile + compose baseline
+- Dockerfile + compose baseline with optional hardened reverse proxy
 
 ## One-command Docker Install
 ```bash
@@ -45,3 +45,5 @@ pytest -q
 - Admin guide: `securado_axiom/docs/ADMIN_GUIDE.md`
 
 - Production release plan: `securado_axiom/docs/PRODUCTION_RELEASE_PLAN.md`
+
+- Load test utility: `python -m securado_axiom.scripts.load_test`

@@ -33,6 +33,7 @@ Create `.env` from `.env.example` and set secure values:
 - `AXIOM_AUDIT_LOG_PATH`
 - `AXIOM_STATE_STORE_PATH`
 - `AXIOM_SAD_SIGNING_SECRET`
+- `AXIOM_PLAYBOOK_SIGNING_SECRET`
 - `AXIOM_MAX_CHAIN_LENGTH`
 - `AXIOM_RATE_LIMIT_PER_MINUTE`
 - `AXIOM_ADMIN_API_KEY`
@@ -68,6 +69,7 @@ Manual compose:
 
 ```bash
 docker compose -f docker/docker-compose.yml up --build -d
+# proxy available on http://localhost:8081
 ```
 
 Stop:
@@ -93,3 +95,10 @@ docker compose -f docker/docker-compose.yml down
 2. Revert to prior tag/commit.
 3. Restore previous environment settings.
 4. Re-run smoke tests.
+
+
+## 10) Basic Load Test
+
+```bash
+python -m securado_axiom.scripts.load_test
+```

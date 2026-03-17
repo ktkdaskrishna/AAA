@@ -45,3 +45,6 @@ Implemented now (in order):
 1. P0.1 persistent engagement/session state store.
 2. P0.2 secrets file support and strict-production config checks.
 3. P0.3 readiness + metrics endpoints.
+4. P1.1 reverse proxy reference deployment with hardened headers (nginx).
+5. P1.5 signed playbook bundle verification + schema checks.
+6. P2.5 initial SLO/load-test utility script baseline.

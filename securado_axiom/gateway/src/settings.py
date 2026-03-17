@@ -10,6 +10,7 @@ class Settings:
     audit_log_path: Path
     state_store_path: Path
     sad_signing_secret: str
+    playbook_signing_secret: str
     max_chain_length: int
     rate_limit_per_minute: int
     admin_api_key: str
@@ -30,6 +31,8 @@ def validate_settings(settings: Settings) -> None:
         raise ValueError("Invalid AXIOM_ADMIN_API_KEY for strict production mode")
     if settings.sad_signing_secret in {"", "dev-sad-secret"}:
         raise ValueError("Invalid AXIOM_SAD_SIGNING_SECRET for strict production mode")
+    if settings.playbook_signing_secret in {"", "dev-playbook-secret"}:
+        raise ValueError("Invalid AXIOM_PLAYBOOK_SIGNING_SECRET for strict production mode")
 
 
 def load_settings() -> Settings:
@@ -37,6 +40,7 @@ def load_settings() -> Settings:
         audit_log_path=Path(os.getenv("AXIOM_AUDIT_LOG_PATH", "securado_axiom/audit/audit.log")),
         state_store_path=Path(os.getenv("AXIOM_STATE_STORE_PATH", "securado_axiom/state/state.json")),
         sad_signing_secret=_read_secret("AXIOM_SAD_SIGNING_SECRET", "dev-sad-secret"),
+        playbook_signing_secret=_read_secret("AXIOM_PLAYBOOK_SIGNING_SECRET", "dev-playbook-secret"),
         max_chain_length=int(os.getenv("AXIOM_MAX_CHAIN_LENGTH", "10")),
         rate_limit_per_minute=int(os.getenv("AXIOM_RATE_LIMIT_PER_MINUTE", "60")),
         admin_api_key=_read_secret("AXIOM_ADMIN_API_KEY", "change-me"),

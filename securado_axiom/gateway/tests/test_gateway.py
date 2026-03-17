@@ -38,6 +38,7 @@ def _service(tmp_path: Path, max_chain_length: int = 10, rate_limit_per_minute: 
         audit_log_path=tmp_path / "audit.log",
         state_store_path=tmp_path / "state.json",
         sad_signing_secret=TEST_SIGNING_SECRET,
+        playbook_signing_secret="dev-playbook-secret",
         max_chain_length=max_chain_length,
         rate_limit_per_minute=rate_limit_per_minute,
         admin_api_key="admin-key",

@@ -10,6 +10,7 @@ from .kill_switch import KillSwitch
 from .models import SAD, ToolCall
 from .rate_limiter import RateLimitError, SlidingWindowRateLimiter
 from .risk_classifier import UnknownTechniqueError, classify_risk
+from .playbook_validator import PlaybookValidationError
 from .sad_validator import SADValidationError, validate_sad
 from .scope_enforcer import ScopeError, enforce_scope
 from .settings import Settings, load_settings
@@ -151,6 +152,8 @@ class GatewayHTTPAPI:
             return 400, "SAD_INVALID"
         if isinstance(exc, UnknownTechniqueError):
             return 400, "UNKNOWN_TECHNIQUE"
+        if isinstance(exc, PlaybookValidationError):
+            return 500, "PLAYBOOK_BUNDLE_INVALID"
         if isinstance(exc, ValueError):
             return 400, text
         return 500, "INTERNAL_ERROR"
