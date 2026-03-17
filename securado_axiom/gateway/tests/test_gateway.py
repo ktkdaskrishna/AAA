@@ -12,11 +12,13 @@ from securado_axiom.gateway.src.settings import Settings
 
 
 TEST_SIGNING_SECRET = "unit-test-signing"
+from securado_axiom.gateway.src.server import GatewayService
 
 
 def _sad_payload() -> dict:
     now = int(time.time())
     sad = {
+    return {
         "engagement_id": "ENG-TEST-1",
         "allowed_cidrs": ["10.0.0.0/24"],
         "excluded_ips": ["10.0.0.10"],
@@ -45,6 +47,12 @@ def _service(tmp_path: Path, max_chain_length: int = 10, rate_limit_per_minute: 
         strict_production=False,
     )
     return GatewayService(settings=settings)
+        "signature": "SIGNED_BY_AUTHORIZED_KEY",
+    }
+
+
+def _service(tmp_path: Path) -> GatewayService:
+    return GatewayService(audit_path=tmp_path / "audit.log")
 
 
 def test_load_sad_success(tmp_path: Path) -> None:

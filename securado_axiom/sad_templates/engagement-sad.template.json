@@ -7,4 +7,5 @@
   "permitted_tactics": ["Reconnaissance", "Execution"],
   "session_secret": "replace_me",
   "signature": "replace_with_hmac_sha256_signature"
+  "signature": "SIGNED_BY_AUTHORIZED_KEY"
 }

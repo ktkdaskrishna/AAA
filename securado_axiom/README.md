@@ -35,6 +35,9 @@ python -m securado_axiom.gateway.src.app
 - `GET /ready`
 - `GET /metrics`
 
+python -m securado_axiom.gateway.src.server
+```
+
 Run tests:
 ```bash
 pytest -q
